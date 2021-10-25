@@ -161,32 +161,52 @@ int wonGame()
   return wonGame;
 }
 void teardown()
-  {
-    free(board);
-    printf("Ending the game.\n");
-  }
+{
+  free(board);
+  printf("Ending the game.\n");
+}
 int saveGame(char *fileName)
+{
+  fp = fopen(("%s", fileName), "w+");
+  if(fp != NULL)//make sure nothing went wrong
   {
-    fp = fopen(("%s", fileName), "w+");
-    if(fp != NULL)//make sure nothing went wrong
+    fprintf(fp, "%d\n", boardsize);//the first line indicates the size of the board to be loaded
+    int r, c = 0;
+    for(r = 0; r < boardsize; r++)
     {
-      fprintf(fp, "%d\n", boardsize);//the first line indicates the size of the board to be loaded
-      int r, c = 0;
-      for(r = 0; r < boardsize; r++)
+      for(c = 0; c < boardsize; c++)
       {
-        for(c = 0; c < boardsize; c++)
-        {
-          fprintf(fp, "%3d ", board[r][c]);//3 digits so it all lines up, and a space to break up each tile
-        }
-        fprintf(fp, "\n");
+        fprintf(fp, "%3d ", board[r][c]);//3 digits so it all lines up, and a space to break up each tile
       }
-      return 0;
+      fprintf(fp, "\n");
     }
-    else
+    return 0;
+  }
+  else
+  {
+    return -1;//return this if something went wrong
+  }
+int loadGame(char *fileName)
+{
+  fp = fopen(("%s", fileName), "r");
+  if(fp != NULL)
+  {
+    fscanf(fp, "%d", &boardsize);//first line should be an int indicating board size
+    int r, c = 0;
+    board = malloc(boardsize * sizeof(*board));
+    for(int i = 0; i < boardsize; i++)
     {
-      return -1;//return this if something went wrong
+      board[i] = malloc(boardsize * sizeof(board[0]));
+    }
+    for(r = 0; r < boardsize; r++)
+    {
+      for(c = 0; c < boardsize; c++)
+      {
+        fscanf(fp, "%d", &board[r][c]);
+      }
     }
   }
+}
 int main()
 {
   srand(time(NULL));
@@ -224,18 +244,24 @@ int main()
       initialize(boardsize);
     }
     if(input == 's')
+    {
+      printf("Please enter the name of the board to save\n");
+      scanf("%s", fileName);
+      if(saveGame(fileName) != -1)
       {
-        printf("Please enter the name of the board to save\n");
-        scanf("%s", fileName);
-        if(saveGame(fileName) != -1)
-        {
-          printf("Game successfully saved\n");
-        }
-        else
-        {
-          printf("There was an issue\n");
-        }
+        printf("Game successfully saved\n");
       }
+      else
+      {
+        printf("There was an issue\n");
+      }
+    }
+    if(input == 'l')
+    {
+      printf("Please enter the name of the board to load\n");
+      scanf("%s", fileName);
+      
+    }
     if(input == 'p')
     {
       displayBoard();
