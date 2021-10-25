@@ -1,10 +1,11 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <time.h>
-int boardsize = 0;
+int boardsize = 4;//board is initially 4x4
 int **board;
 int blankX;//tracks the x position of the empty space, which is initially the bottom right corner
 int blankY;//tracks the y position of the empty space, which is initially the bottom right corner
+FILE *fp;
 /**
  * prints the entire board
  * @return nothing
@@ -90,37 +91,32 @@ void moveTile(int tile)
   }
 }
 /**
- *
- *
+ * initialize a new board.
+ * @param boardDimension: size of one side of the board.
  */
-void initialize()
+void initialize(int boardDimension)
   {
-    while(boardsize < 2 || boardsize > 10)
+    board = malloc(boardDimension * sizeof(*board));
+    for(int i = 0; i < boardDimension; i++)
     {
-      printf("Enter the size of the new board. It must be between 2 and 10\n");
-      scanf("%d", &boardsize);
+      board[i] = malloc(boardDimension * sizeof(board[0]));
     }
-    board = malloc(boardsize * sizeof(*board));
-    for(int i = 0; i < boardsize; i++)
-    {
-      board[i] = malloc(boardsize * sizeof(board[0]));
-    }
-    int r = rand()%boardsize;
-    int c = rand()%boardsize;
+    int r = rand()%boardDimension;
+    int c = rand()%boardDimension;
     int tileToPlace = 1;
-    while(tileToPlace < ((boardsize * boardsize)))
+    while(tileToPlace < ((boardDimension * boardDimension)))
     {
       if(board[r][c] == 0)//if the randomly chosen tile is empty,
       {
         board[r][c] = tileToPlace;//place the tile there
         tileToPlace++;//move on to the next tile
       }
-      r = rand()%boardsize;
-      c = rand()%boardsize;//pick another spot
+      r = rand()%boardDimension;
+      c = rand()%boardDimension;//pick another spot
     }
-    for(r = 0; r < boardsize; r++)
+    for(r = 0; r < boardDimension; r++)
     {
-      for(c = 0; c < boardsize; c++)
+      for(c = 0; c < boardDimension; c++)
       {
         if(board[r][c] == 0)
         {
@@ -129,11 +125,11 @@ void initialize()
         }
       }
     }
-    printf("Setting up the game\n");
+    printf("Setting up a game for a board of size %d\n", boardDimension);
     displayBoard();
   }
 /**
- *
+ * Checks if the board is sorted from one to the last tile. Blank space is ignored
  *
  */
 int wonGame()
@@ -169,12 +165,35 @@ void teardown()
     free(board);
     printf("Ending the game.\n");
   }
+int saveGame(char *fileName)
+  {
+    fp = fopen(("%s", fileName), "w+");
+    if(fp != NULL)//make sure nothing went wrong
+    {
+      fprintf(fp, "%d\n", boardsize);//the first line indicates the size of the board to be loaded
+      int r, c = 0;
+      for(r = 0; r < boardsize; r++)
+      {
+        for(c = 0; c < boardsize; c++)
+        {
+          fprintf(fp, "%3d ", board[r][c]);//3 digits so it all lines up, and a space to break up each tile
+        }
+        fprintf(fp, "\n");
+      }
+      return 0;
+    }
+    else
+    {
+      return -1;//return this if something went wrong
+    }
+  }
 int main()
 {
   srand(time(NULL));
   char input = ' ';
+  char *fileName = malloc(sizeof(char));
   int tile = 0;
-  initialize();
+  initialize(boardsize);
   while(input != 'q')
   {
     if(wonGame() == 1)
@@ -184,7 +203,12 @@ int main()
       printf("Setting up a new game\n");
       free(board);
       boardsize = 0;
-      initialize();
+      while(boardsize < 2 || boardsize > 10)
+      {
+        printf("Enter the size of the new board. It must be between 2 and 10\n");
+        scanf("%d", &boardsize);
+      }
+      initialize(boardsize);
     }
     printf("Menu: [n]ew, [s]ave, [l]oad, [p]rint, [m]ove, [q]uit? ");
     scanf(" %c", &input);
@@ -192,8 +216,26 @@ int main()
     {
       free(board);
       boardsize = 0;
-      initialize();
+      while(boardsize < 2 || boardsize > 10)
+      {
+        printf("Enter the size of the new board. It must be between 2 and 10\n");
+        scanf("%d", &boardsize);
+      }
+      initialize(boardsize);
     }
+    if(input == 's')
+      {
+        printf("Please enter the name of the board to save\n");
+        scanf("%s", fileName);
+        if(saveGame(fileName) != -1)
+        {
+          printf("Game successfully saved\n");
+        }
+        else
+        {
+          printf("There was an issue\n");
+        }
+      }
     if(input == 'p')
     {
       displayBoard();
