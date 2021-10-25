@@ -95,39 +95,39 @@ void moveTile(int tile)
  * @param boardDimension: size of one side of the board.
  */
 void initialize(int boardDimension)
+{
+  board = malloc(boardDimension * sizeof(*board));
+  for(int i = 0; i < boardDimension; i++)
   {
-    board = malloc(boardDimension * sizeof(*board));
-    for(int i = 0; i < boardDimension; i++)
-    {
-      board[i] = malloc(boardDimension * sizeof(board[0]));
-    }
-    int r = rand()%boardDimension;
-    int c = rand()%boardDimension;
-    int tileToPlace = 1;
-    while(tileToPlace < ((boardDimension * boardDimension)))
-    {
-      if(board[r][c] == 0)//if the randomly chosen tile is empty,
-      {
-        board[r][c] = tileToPlace;//place the tile there
-        tileToPlace++;//move on to the next tile
-      }
-      r = rand()%boardDimension;
-      c = rand()%boardDimension;//pick another spot
-    }
-    for(r = 0; r < boardDimension; r++)
-    {
-      for(c = 0; c < boardDimension; c++)
-      {
-        if(board[r][c] == 0)
-        {
-          blankX = r;//find whatever tile was left blank
-          blankY = c;//and store x and y coordinates in blankX and blankY
-        }
-      }
-    }
-    printf("Setting up a game for a board of size %d\n", boardDimension);
-    displayBoard();
+    board[i] = malloc(boardDimension * sizeof(board[0]));
   }
+  int r = rand()%boardDimension;
+  int c = rand()%boardDimension;
+  int tileToPlace = 1;
+  while(tileToPlace < ((boardDimension * boardDimension)))
+  {
+    if(board[r][c] == 0)//if the randomly chosen tile is empty,
+    {
+      board[r][c] = tileToPlace;//place the tile there
+      tileToPlace++;//move on to the next tile
+    }
+    r = rand()%boardDimension;
+    c = rand()%boardDimension;//pick another spot
+  }
+  for(r = 0; r < boardDimension; r++)
+  {
+    for(c = 0; c < boardDimension; c++)
+    {
+      if(board[r][c] == 0)
+      {
+        blankX = r;//find whatever tile was left blank
+        blankY = c;//and store x and y coordinates in blankX and blankY
+      }
+    }
+  }
+  printf("Setting up a game for a board of size %d\n", boardDimension);
+  displayBoard();
+}
 /**
  * Checks if the board is sorted from one to the last tile. Blank space is ignored
  *
@@ -167,7 +167,7 @@ void teardown()
 }
 int saveGame(char *fileName)
 {
-  fp = fopen(("%s", fileName), "w+");
+  fp = fopen(("%s", fileName), "w");
   if(fp != NULL)//make sure nothing went wrong
   {
     fprintf(fp, "%d\n", boardsize);//the first line indicates the size of the board to be loaded
@@ -186,6 +186,7 @@ int saveGame(char *fileName)
   {
     return -1;//return this if something went wrong
   }
+}
 int loadGame(char *fileName)
 {
   fp = fopen(("%s", fileName), "r");
@@ -193,6 +194,7 @@ int loadGame(char *fileName)
   {
     fscanf(fp, "%d", &boardsize);//first line should be an int indicating board size
     int r, c = 0;
+    free(board);
     board = malloc(boardsize * sizeof(*board));
     for(int i = 0; i < boardsize; i++)
     {
@@ -202,7 +204,12 @@ int loadGame(char *fileName)
     {
       for(c = 0; c < boardsize; c++)
       {
-        fscanf(fp, "%d", &board[r][c]);
+        fscanf(fp, "%d", &board[r][c]);//fill the newly created board with values from the file being loaded
+        if(board[r][c] == 0)
+        {
+          blankX = r;
+          blankY = c;//update blankX and blankY for the new board
+        }
       }
     }
   }
@@ -260,7 +267,10 @@ int main()
     {
       printf("Please enter the name of the board to load\n");
       scanf("%s", fileName);
-      
+      if(loadGame(fileName) == -1)
+      {
+        printf("Failed to load game. Does the file exist?\n");
+      }
     }
     if(input == 'p')
     {
