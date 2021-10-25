@@ -101,15 +101,24 @@ void initialize(int boardDimension)
   {
     board[i] = malloc(boardDimension * sizeof(board[0]));
   }
-  int r = rand()%boardDimension;
-  int c = rand()%boardDimension;
+  int r = 0;
+  int c = 0;
+  for(r = 0; r < boardsize; r++)
+  {
+    for(c = 0; c < boardsize; c++)
+    {
+      board[r][c] = 0;//somehow, using save/load results in boards being init'd with huge initial values
+    }//using this to fix that
+  }
+  r = rand()%boardsize;
+  c = rand()%boardsize;
   int tileToPlace = 1;
   while(tileToPlace < ((boardDimension * boardDimension)))
   {
-    if(board[r][c] == 0)//if the randomly chosen tile is empty,
+    if(board[r][c] == 0)
     {
       board[r][c] = tileToPlace;//place the tile there
-      tileToPlace++;//move on to the next tile
+      tileToPlace++;//move on to the next tile, or rather, the value representing that tile
     }
     r = rand()%boardDimension;
     c = rand()%boardDimension;//pick another spot
@@ -121,7 +130,7 @@ void initialize(int boardDimension)
       if(board[r][c] == 0)
       {
         blankX = r;//find whatever tile was left blank
-        blankY = c;//and store x and y coordinates in blankX and blankY
+        blankY = c;//and store x and y coordinates of that tile in blankX and blankY
       }
     }
   }
@@ -202,9 +211,9 @@ int saveGame(char *fileName)
 int loadGame(char *fileName)
 {
   fp = fopen(("%s", fileName), "r");
-  if(fp != NULL)
+  if(fp)
   {
-    fscanf(fp, "%d", &boardsize);//first line should be an int indicating board size
+    fscanf(fp, "%d", &boardsize);//scan first line which should be an int indicating board size
     int r, c = 0;
     free(board);
     board = malloc(boardsize * sizeof(*board));
@@ -229,7 +238,7 @@ int loadGame(char *fileName)
   }
   else
   {
-    fclose(fp);
+    
     return -1;
   }
 }
@@ -249,7 +258,6 @@ int main()
       printf("Setting up a new game\n");
       free(board);
       boardsize = 0;
-      while(getchar()!='\n');
       while(boardsize < 2 || boardsize > 10)
       {
         printf("Enter the size of the new board. It must be between 2 and 10\n");
@@ -287,7 +295,7 @@ int main()
     {
       printf("Please enter the name of the board to load\n");
       scanf("%s", fileName);
-      if(loadGame(fileName) != -1)
+      if(loadGame(fileName) == 0)
       {
         printf("Loaded game successfully\n");
       }
