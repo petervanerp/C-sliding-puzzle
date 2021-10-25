@@ -130,7 +130,7 @@ void initialize(int boardDimension)
 }
 /**
  * Checks if the board is sorted from one to the last tile. Blank space is ignored
- *
+ * return: 1 if true, 0 if false
  */
 int wonGame()
 {
@@ -165,12 +165,17 @@ void teardown()
   free(board);
   printf("Ending the game.\n");
 }
+/**
+ * saves the game, or returns -1 if there was an issue
+ * @param fileName: name of the file
+ * @return 0 if successful, -1 if error
+ */
 int saveGame(char *fileName)
 {
   fp = fopen(("%s", fileName), "w");
   if(fp != NULL)//make sure nothing went wrong
   {
-    fprintf(fp, "%d\n", boardsize);//the first line indicates the size of the board to be loaded
+    fprintf(fp, "%3d\n", boardsize);//the first line indicates the size of the board to be loaded
     int r, c = 0;
     for(r = 0; r < boardsize; r++)
     {
@@ -180,13 +185,20 @@ int saveGame(char *fileName)
       }
       fprintf(fp, "\n");
     }
+    fclose(fp);
     return 0;
   }
   else
   {
+    fclose(fp);
     return -1;//return this if something went wrong
   }
 }
+/**
+ * loads a file determined by fileName, or returns -1 if theres an issue
+ * @param fileName: file to load
+ * return 0 if successful, -1 if theres an error
+ */
 int loadGame(char *fileName)
 {
   fp = fopen(("%s", fileName), "r");
@@ -212,6 +224,13 @@ int loadGame(char *fileName)
         }
       }
     }
+    fclose(fp);
+    return 0;
+  }
+  else
+  {
+    fclose(fp);
+    return -1;
   }
 }
 int main()
@@ -230,6 +249,7 @@ int main()
       printf("Setting up a new game\n");
       free(board);
       boardsize = 0;
+      while(getchar()!='\n');
       while(boardsize < 2 || boardsize > 10)
       {
         printf("Enter the size of the new board. It must be between 2 and 10\n");
@@ -260,16 +280,20 @@ int main()
       }
       else
       {
-        printf("There was an issue\n");
+        printf("There was an issue saving the game\n");
       }
     }
     if(input == 'l')
     {
       printf("Please enter the name of the board to load\n");
       scanf("%s", fileName);
-      if(loadGame(fileName) == -1)
+      if(loadGame(fileName) != -1)
       {
-        printf("Failed to load game. Does the file exist?\n");
+        printf("Loaded game successfully\n");
+      }
+      else
+      {
+        printf("Failed to load game. Does the file not exist?\n");
       }
     }
     if(input == 'p')
