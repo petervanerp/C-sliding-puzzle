@@ -89,6 +89,10 @@ void moveTile(int tile)
       printf("Invalid Move.\n");//print this if the move isn't valid
   }
 }
+/**
+ *
+ *
+ */
 void initialize()
   {
     while(boardsize < 2 || boardsize > 10)
@@ -106,13 +110,13 @@ void initialize()
     int tileToPlace = 1;
     while(tileToPlace < ((boardsize * boardsize)))
     {
-      if(board[r][c] == 0)
+      if(board[r][c] == 0)//if the randomly chosen tile is empty,
       {
-        board[r][c] = tileToPlace;
-        tileToPlace++;
+        board[r][c] = tileToPlace;//place the tile there
+        tileToPlace++;//move on to the next tile
       }
       r = rand()%boardsize;
-      c = rand()%boardsize;
+      c = rand()%boardsize;//pick another spot
     }
     for(r = 0; r < boardsize; r++)
     {
@@ -120,8 +124,8 @@ void initialize()
       {
         if(board[r][c] == 0)
         {
-          blankX = r;
-          blankY = c;
+          blankX = r;//find whatever tile was left blank
+          blankY = c;//and store x and y coordinates in blankX and blankY
         }
       }
     }
@@ -129,8 +133,8 @@ void initialize()
     displayBoard();
   }
 /**
- * 
- * 
+ *
+ *
  */
 int wonGame()
 {
