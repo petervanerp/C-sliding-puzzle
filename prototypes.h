@@ -7,3 +7,8 @@ int saveGame(char*);
 int loadGame(char*);
 void sendBoard(int);
 void readBoard(int);
+int checkWin(int);
+int checkWinServerEnd();
+int isMoveValid(int);
+int moveTile(int);
+int getMoveValidity(int, int);

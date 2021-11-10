@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <unistd.h>
 #include "prototypes.h"
-//#include <fcntl.h>
 #include <errno.h>
 #include <stdlib.h>
 #include <time.h>
@@ -90,6 +89,10 @@ int newBoard(int size)
     return 0;//successfully made a board
   }
 }
+/**
+ * saves a game based on fileName provided
+ * return: 0 if success -1 if fail
+ */
 int saveGame(char *fileName)
 {
   FILE *fp;
@@ -115,11 +118,48 @@ int saveGame(char *fileName)
     return -1;
   }
 }
+/**
+ * loads a file based on fileName provided
+ * return -1 if fail 0 if success
+ */
 int loadGame(char *fileName)
 {
-  return -1;
+  FILE *fp;
+  fp = fopen(("%s", fileName), "r");
+  if(fp)
+  {
+    fscanf(fp, "%d", &boardSize);//first line will indicated board size
+    int r, c = 0;
+    free(board);
+    board = malloc(boardSize * sizeof(*board));
+    for(int i = 0; i < boardSize; i++)
+    {
+      board[i] = malloc(boardSize * sizeof(board[0]));
+    }
+    for(r = 0; r < boardSize; r++)
+    {
+      for(c = 0; c < boardSize; c++)
+      {
+        fscanf(fp, "%d", &board[r][c]);
+        if(board[r][c] == 0)
+        {
+          blankX = r;
+          blankY = c;
+        }
+      }
+    }
+    fclose(fp);
+    return 0;
+  }
+  else
+  {
+    return -1;
+  }
 }
-
+/**
+ * sends every int in the array one by one to be read on client end
+ * @param: open write pipe to client
+ */
 void sendBoard(int toClient)
 {
   int r, c;
@@ -129,5 +169,92 @@ void sendBoard(int toClient)
     {
       write(toClient, &board[r][c], sizeof(int));
     }
+  }
+}
+/**
+ * Checks if the board is sorted from one to the last. ignores blank space
+ * return: -1 if false, 0 if true
+ */
+int checkWinServerEnd()
+{
+  int r, c;
+  int lastTile = 1;
+  for(r = 0; r < boardSize; r++)
+  {
+    for(c = 0; c < boardSize; c++)
+    {
+      if(board[r][c] != 0)
+      {
+        if(board[r][c] - 1 != lastTile)
+        {
+          return -1;//return -1 if the current tile is not one greater than the last one
+        }
+        else
+        {
+          lastTile = board[r][c];
+        }
+      }
+    }
+  }
+  return 0;//return 0 if win
+}
+/**
+ * checks if the given tile can be moved
+ * @param tile: the number associated with the tile to be moved
+ */
+int isMoveValid(int tile)
+{
+  if(blankX+1 < boardSize && board[blankX+1][blankY] == tile)//each statement refers to checking if the tile is adjacent to the blank space in a certain direction
+  {
+    return 1;//return an integer indicating which direction
+  }
+  else if(blankX-1 > -1 && board[blankX-1][blankY] == tile)
+  {
+    return 2;
+  }
+  else if(blankY+1 < boardSize && board[blankX][blankY+1] == tile)
+  {
+    return 3;
+  }
+  else if(blankY-1 > -1 && board[blankX][blankY-1] == tile)
+  {
+    return 4;
+  }
+  else
+  {
+    return 0;//if the tile isnt near the blank space
+  }
+}
+/**
+ * moves a tile if possible
+ * @param tile to be moved
+ * return 0 if successful, -1 if fail
+ */
+int moveTile(int tile)
+{
+  switch(isMoveValid(tile))
+  {
+    case 1:
+      board[blankX+1][blankY] = 0;//set space with given tile to 0
+      board[blankX][blankY] = tile;//set blank space to tile's value
+      blankX++;//adjust blankX to reflect new blank space location
+      return 0;//above comments apply to each case
+    case 2:
+      board[blankX-1][blankY] = 0;
+      board[blankX][blankY] = tile;
+      blankX--;
+      return 0;
+    case 3:
+      board[blankX][blankY+1] = 0;
+      board[blankX][blankY] = tile;
+      blankY++;
+      return 0;
+    case 4:
+      board[blankX][blankY-1] = 0;
+      board[blankX][blankY] = tile;
+      blankY--;
+      return 0;
+    case 0:
+      return -1;//return -1 if fail
   }
 }
