@@ -8,6 +8,7 @@ int **board;
 int blankX;
 int blankY;
 int boardSize;
+/*
 int readCommand(int fromClient, int size)
 {
   int nread;
@@ -35,6 +36,7 @@ int readCommand(int fromClient, int size)
     }
   }
 }
+*/
 /**
  * Checks if the entered size is valid, and if so makes a new board
  * Time permitting I will use a better algorithm than randomly picking tiles
@@ -47,12 +49,12 @@ int readCommand(int fromClient, int size)
 void freeBoard(int size)
 {
   for(int i = 0; i < size; i++)
-{
-  free(board[i]);
+  {
+    free(board[i]);
+  }
+  free(board);
 }
-free(board);
-}
-int newBoard(int size)
+int newBoard(int size, int oldSize)
 {
   if(size > 10 || size < 2)
   {
@@ -60,8 +62,10 @@ int newBoard(int size)
   }
   else
   {
-    board = malloc((size+1) * sizeof(*board));
-    for(int i = 0; i < (size+1); i++)
+    //freeBoard(oldSize);
+    free(board);
+    board = malloc((size) * sizeof(*board));
+    for(int i = 0; i < (size); i++)
     {
       board[i] = malloc((size) * sizeof(board[0]));
     }
@@ -140,7 +144,8 @@ int loadGame(char *fileName)
   if(fp)
   {
     fscanf(fp, "%d", &boardSize);//first line will indicated board size
-    freeBoard(boardSize);
+    //freeBoard(boardSize);
+    free(board);
     int r, c = 0;
     board = malloc(boardSize * sizeof(*board));
     for(int i = 0; i < boardSize; i++)

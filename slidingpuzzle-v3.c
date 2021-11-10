@@ -9,7 +9,7 @@
 int main()
 {
   srand(time(NULL));
-  newBoard(4);
+  newBoard(4, 0);
   boardSize = 4;
   //client to server pipe
   int clientToServer[2];
@@ -118,13 +118,18 @@ int main()
       {//server
         close(clientToServer[1]);
         close(serverToClient[0]);
+        int newBoardSize = boardSize;//simplest way to avoid trying to free a board thats larger/smaller than needed: never let the boardSize changed until vetted by newBoard
         int winStatus = 0;//store win status here to send to client at the end of loop
         read(clientToServer[0], &command, sizeof(int));
         switch(command)
         {
           case 1://new
-            read(clientToServer[0], &boardSize, sizeof(int));//next int will always be size
-            result = newBoard(boardSize);
+            read(clientToServer[0], &newBoardSize, sizeof(int));//next int will always be size
+            result = newBoard(newBoardSize, boardSize);
+            if(result == 0)
+            {
+              boardSize = newBoardSize;//return to original boardSize if there's an error
+            }
             write(serverToClient[1], &result, sizeof(int));
             break;
           case 2://save
@@ -135,8 +140,12 @@ int main()
           case 3://load
             read(clientToServer[0], &c2sBuffer, sizeof(&c2sBuffer));
             result = loadGame(c2sBuffer);
+            printf("LOAD RESULT %d", result);
             write(serverToClient[1], &result, sizeof(int));
-            write(serverToClient[1], &boardSize, sizeof(int));//update boardsize for client
+            if(result == 0)
+            {
+              write(serverToClient[1], &boardSize, sizeof(int));//update boardsize for client
+            }
             break;
           case 4://move
             read(clientToServer[0], &command, sizeof(int));
@@ -151,20 +160,19 @@ int main()
             write(serverToClient[1], &result, sizeof(int));
             break;
         }
-      winStatus = checkWinServerEnd();
-      write(serverToClient[1], &winStatus, sizeof(int));//write win status
-      if(winStatus == 0)
-      {
-        freeBoard(boardSize);
-        read(clientToServer[0], &boardSize, sizeof(int));
-        newBoard(boardSize);
-        while(newBoard(boardSize) != 0)
+        winStatus = checkWinServerEnd();
+        write(serverToClient[1], &winStatus, sizeof(int));//write win status
+        if(winStatus == 0)
         {
-          printf("Attempting read\n");
-          read(clientToServer[0], &boardSize, sizeof(int));
-          printf("Attempting board of size %d\n", boardSize);
+          //freeBoard(boardSize);
+          newBoardSize = boardSize;
+          read(clientToServer[0], &newBoardSize, sizeof(int));
+          newBoard(newBoardSize, boardSize);
+          while(newBoard(newBoardSize, boardSize) != 0)
+          {
+            read(clientToServer[0], &boardSize, sizeof(int));
+          }
         }
-      }
       }
     }
   }
