@@ -9,7 +9,7 @@
 int main()
 {
   srand(time(NULL));
-  newBoard(4, 0);
+  newBoard(4);
   boardSize = 4;
   //client to server pipe
   int clientToServer[2];
@@ -45,8 +45,8 @@ int main()
         {
           case 1://new
             printf("Enter size of new board. Must be at least 2 and no more than 10\n");
-            scanf("%d", &boardSize);//there's no need to actually check the size entered since the server will just return -1 if it's below 2 or above 10
-            write(clientToServer[1], &boardSize, sizeof(int));
+            scanf("%d", &command);//there's no need to actually check the size entered since the server will just return -1 if it's below 2 or above 10
+            write(clientToServer[1], &command, sizeof(int));
             read(serverToClient[0], &result, sizeof(int));
             if(result == -1)
             {
@@ -125,10 +125,10 @@ int main()
         {
           case 1://new
             read(clientToServer[0], &newBoardSize, sizeof(int));//next int will always be size
-            result = newBoard(newBoardSize, boardSize);
+            result = newBoard(newBoardSize);
             if(result == 0)
             {
-              boardSize = newBoardSize;//return to original boardSize if there's an error
+              boardSize = newBoardSize;//change boardSize if success
             }
             write(serverToClient[1], &result, sizeof(int));
             break;
@@ -167,11 +167,12 @@ int main()
           //freeBoard(boardSize);
           newBoardSize = boardSize;
           read(clientToServer[0], &newBoardSize, sizeof(int));
-          newBoard(newBoardSize, boardSize);
-          while(newBoard(newBoardSize, boardSize) != 0)
+          newBoard(newBoardSize);
+          while(newBoard(newBoardSize) != 0)
           {
-            read(clientToServer[0], &boardSize, sizeof(int));
+            read(clientToServer[0], &newBoardSize, sizeof(int));
           }
+          boardSize = newBoardSize;//after making a new board, change the size to match
         }
       }
     }

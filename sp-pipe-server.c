@@ -8,41 +8,6 @@ int **board;
 int blankX;
 int blankY;
 int boardSize;
-/*
-int readCommand(int fromClient, int size)
-{
-  int nread;
-  int buffer;
-  while(1)
-  {
-    nread = read(fromClient, &buffer, size);
-    switch(nread)
-    {
-      case -1:
-        if(errno == EAGAIN)
-        {
-          sleep(1);
-          break;
-        }
-        else
-        {
-          close(fromClient);
-          exit(0);
-        }
-      case 0:
-        exit(0);
-      default:
-        return buffer;
-    }
-  }
-}
-*/
-/**
- * Checks if the entered size is valid, and if so makes a new board
- * Time permitting I will use a better algorithm than randomly picking tiles
- * @param size: size of the board
- * return: -1 if size is invalid, 0 otherwise
- */
 /**
  * frees board for the purposes of making a new one
  */
@@ -54,7 +19,13 @@ void freeBoard(int size)
   }
   free(board);
 }
-int newBoard(int size, int oldSize)
+/**
+ * Checks if the entered size is valid, and if so makes a new board
+ * Time permitting I will use a better algorithm than randomly picking tiles
+ * @param size: size of the board
+ * return: -1 if size is invalid, 0 otherwise
+ */
+int newBoard(int size)
 {
   if(size > 10 || size < 2)
   {
