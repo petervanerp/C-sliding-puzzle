@@ -12,3 +12,4 @@ int checkWinServerEnd();
 int isMoveValid(int);
 int moveTile(int);
 int getMoveValidity(int, int);
+void freeBoard(int);

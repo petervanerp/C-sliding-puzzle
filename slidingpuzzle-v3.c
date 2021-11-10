@@ -108,7 +108,7 @@ int main()
           boardSize = 0;
           while(boardSize > 10 || boardSize < 2)
           {
-            printf("Enter size of new board. Must be at least 2 and no more than 10\n");
+            printf("You Won! Starting new game\nEnter size of new board. Must be at least 2 and no more than 10\n");
             scanf("%d", &boardSize);
             write(clientToServer[1], &boardSize, sizeof(int));
           }
@@ -155,10 +155,14 @@ int main()
       write(serverToClient[1], &winStatus, sizeof(int));//write win status
       if(winStatus == 0)
       {
-        boardSize == 0;
+        freeBoard(boardSize);
+        read(clientToServer[0], &boardSize, sizeof(int));
+        newBoard(boardSize);
         while(newBoard(boardSize) != 0)
         {
+          printf("Attempting read\n");
           read(clientToServer[0], &boardSize, sizeof(int));
+          printf("Attempting board of size %d\n", boardSize);
         }
       }
       }

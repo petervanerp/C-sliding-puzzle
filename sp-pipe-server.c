@@ -41,6 +41,17 @@ int readCommand(int fromClient, int size)
  * @param size: size of the board
  * return: -1 if size is invalid, 0 otherwise
  */
+/**
+ * frees board for the purposes of making a new one
+ */
+void freeBoard(int size)
+{
+  for(int i = 0; i < size; i++)
+{
+  free(board[i]);
+}
+free(board);
+}
 int newBoard(int size)
 {
   if(size > 10 || size < 2)
@@ -129,8 +140,8 @@ int loadGame(char *fileName)
   if(fp)
   {
     fscanf(fp, "%d", &boardSize);//first line will indicated board size
+    freeBoard(boardSize);
     int r, c = 0;
-    free(board);
     board = malloc(boardSize * sizeof(*board));
     for(int i = 0; i < boardSize; i++)
     {
@@ -178,7 +189,7 @@ void sendBoard(int toClient)
 int checkWinServerEnd()
 {
   int r, c;
-  int lastTile = 1;
+  int lastTile = 0;
   for(r = 0; r < boardSize; r++)
   {
     for(c = 0; c < boardSize; c++)

@@ -22,6 +22,10 @@ int checkWin(int fromServer)
   read(fromServer, &winStatus, sizeof(int));
   return winStatus;
 }
+/**
+ * reads board from server
+ * @param fromServer: open read pipe
+ */
 void readBoard(int fromServer)
 {
   int nextTile;
