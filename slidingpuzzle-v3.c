@@ -140,7 +140,6 @@ int main()
           case 3://load
             read(clientToServer[0], &c2sBuffer, sizeof(&c2sBuffer));
             result = loadGame(c2sBuffer);
-            printf("LOAD RESULT %d", result);
             write(serverToClient[1], &result, sizeof(int));
             if(result == 0)
             {
