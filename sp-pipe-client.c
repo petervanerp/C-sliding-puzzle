@@ -3,13 +3,7 @@
 #include <unistd.h>
 #include "prototypes.h"
 #include "globalVars.h"
-void passCommand(int toServer)
-{
-  int command;
-  printf("Enter a command\n1)New game\n2)Save game\n3)Load game\n4)Print board\n5)Move tile\n6)Quit\n");
-  scanf("%d", &command);
-  write(toServer, &command, sizeof(int));
-}
+
 /**
  * Checks with server to see if the player won.
  * The server will probably already be creating a board as soon as it write an int indicating victory
@@ -56,5 +50,5 @@ int getMoveValidity(int fromServer, int toServer)
   scanf("%d", &tile);
   write(toServer, &tile, sizeof(int));
   read(fromServer, &validity, sizeof(int));
-  return validity;//SHOULD be the same as moveTile(tile)
+  return validity;//should be the same as moveTile(tile)
 }

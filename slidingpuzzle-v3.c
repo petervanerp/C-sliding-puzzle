@@ -5,27 +5,23 @@
 #include "globalVars.h"
 #include <stdlib.h>
 #include <time.h>
-//enum command{cmd_new, cmd_save, cmd_load, cmd_move, cmd_print, cmd_quit};
+#define INITIALBOARD 4
+
 int main()
 {
   srand(time(NULL));
-  newBoard(4);
-  boardSize = 4;
+  boardSize = INITIALBOARD;
+  newBoard(boardSize);
   //client to server pipe
   int clientToServer[2];
   pipe(clientToServer);
-  //char *c2sBuffer = malloc(sizeof(char));
   char c2sBuffer[20];
   //server to client pipe
   int serverToClient[2];
   pipe(serverToClient);
-  //char *s2cBuffer = malloc(sizeof(char));
-  //char s2cBuffer[20];
   pid_t client = fork();
   int command = 0;
-  int tileNumber = 0;
-  int result;//returns results of various functions from server to client
-  result = 0;
+  int result = 0;//returns results of various functions from server to client
   if(client < 0)
   {//error
     exit(3);
@@ -102,6 +98,7 @@ int main()
             break;
           case 6://quit
             printf("Shutting down\n");
+            close(clientToServer[1]);
             exit(0);
         }
         if(checkWin(serverToClient[0]) == 0)
@@ -156,8 +153,6 @@ int main()
             sendBoard(serverToClient[1]);//sends the entire board as a series of integers to be printed
             break;
           case 6://quit
-            result = -1;
-            write(serverToClient[1], &result, sizeof(int));
             break;
         }
         winStatus = checkWinServerEnd();

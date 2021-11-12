@@ -8,17 +8,7 @@ int **board;
 int blankX;
 int blankY;
 int boardSize;
-/**
- * frees board for the purposes of making a new one
- */
-void freeBoard(int size)
-{
-  for(int i = 0; i < size; i++)
-  {
-    free(board[i]);
-  }
-  free(board);
-}
+
 /**
  * Checks if the entered size is valid, and if so makes a new board
  * Time permitting I will use a better algorithm than randomly picking tiles
@@ -33,7 +23,6 @@ int newBoard(int size)
   }
   else
   {
-    //freeBoard(oldSize);
     free(board);
     board = malloc((size) * sizeof(*board));
     for(int i = 0; i < (size); i++)
