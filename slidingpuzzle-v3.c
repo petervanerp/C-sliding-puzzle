@@ -55,6 +55,7 @@ int main()
             else
             {
               printf("Successfully created board\n");
+              boardSize = command;
             }
             break;
           case 2://save
