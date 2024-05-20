@@ -11,7 +11,6 @@ int boardSize;
 
 /**
  * Checks if the entered size is valid, and if so makes a new board
- * Time permitting I will use a better algorithm than randomly picking tiles
  * @param size: size of the board
  * return: -1 if size is invalid, 0 otherwise
  */
